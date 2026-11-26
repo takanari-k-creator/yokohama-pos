@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>横浜 まちのコンビニPOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+1+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--g:#3a8f4b;--g2:#5fae6c;--gl:#e7f3e4;--gll:#f3f9f1;--ink:#1d2a22;--mu:#5d6b62;--ln:#d5dfd6;--bg:#f6f7f3;--ac:#e2702a;--acl:#fdf0e6;--bl:#2f6fb0;--bll:#e8f0fa;--rd:#c8423b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP",system-ui,sans-serif;font-size:16px;line-height:1.6}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+.roomtag{margin-left:auto;background:rgba(0,0,0,.18);border-radius:10px;padding:4px 12px;font-weight:700;font-size:14px}
+.roomtag:empty{display:none}
+.sendst{font-size:13px;font-weight:700;margin-left:8px}
+.onlive{display:none}.live .onlive{display:revert}.live .nolive{display:none}
+.live .submit{display:none}
+.mono{font-family:"M PLUS 1 Code",ui-monospace,monospace}
+header{background:var(--g);color:#fff;padding:12px 20px 0}
+header .top{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:22px;font-weight:900}
+nav{max-width:1240px;margin:10px auto 0;display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:10px 10px 0 0;padding:10px 20px;font-weight:700;font-size:16px}
+nav button.on{background:var(--bg);color:var(--g)}
+main{max-width:1240px;margin:0 auto;padding:18px 20px 40px}
+section.mode{display:none}section.mode.on{display:block}
+.lead{background:#fff;border-left:6px solid var(--g);border-radius:8px;padding:12px 16px;margin-bottom:16px}
+.lead b{color:var(--g)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--ln);border-radius:12px;padding:16px;margin-bottom:16px}
+.card h2{font-size:17px;margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{font-size:12px;background:var(--gl);color:var(--g);padding:2px 8px;border-radius:99px;font-weight:700}
+.settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(max-width:600px){.settings{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.settings label{display:flex;flex-direction:column;font-size:13px;color:var(--mu);font-weight:500}
+.settings select,.settings input{margin-top:3px;padding:7px 8px;border:1px solid var(--ln);border-radius:8px;background:#fff;color:var(--ink);font-size:15px}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+.item{border:1px solid var(--ln);background:#fff;border-radius:10px;padding:8px 6px;text-align:center;position:relative}
+.item:hover{border-color:var(--g2)}
+.item .e{font-size:28px;line-height:1.2}
+.item .nm{font-size:13px;font-weight:700;line-height:1.3;min-height:34px;display:flex;align-items:center;justify-content:center}
+.item .pr{font-size:13px;color:var(--mu)}
+.item .q{position:absolute;top:4px;right:4px;background:var(--ac);color:#fff;border-radius:99px;min-width:22px;height:22px;font-size:12px;font-weight:700;display:none;place-items:center;padding:0 6px}
+.item.has{border-color:var(--ac);background:var(--acl)}.item.has .q{display:grid}
+.cart .row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px dashed var(--ln)}
+.cart .ctl{margin-left:auto;display:flex;gap:4px;align-items:center}
+.cart .row .x{border:1px solid var(--ln);background:#fff;border-radius:6px;width:30px;height:30px;font-weight:700}
+.cart .row .del{border:1px solid var(--rd);color:var(--rd);background:#fff;border-radius:6px;height:30px;padding:0 10px;font-size:13px;font-weight:700}
+.cart .clr{margin-top:8px;border:1px solid var(--ln);background:#fff;color:var(--mu);border-radius:8px;padding:5px 12px;font-size:13px}
+.cart .empty{color:var(--mu);font-size:14px}
+.pay{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.pay label{border:1px solid var(--ln);border-radius:99px;padding:5px 12px;font-size:14px;background:#fff;cursor:pointer}
+.pay input{display:none}
+.pay label:has(input:checked){background:var(--g);color:#fff;border-color:var(--g)}
+.btn{background:var(--g);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;font-size:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sec{background:#fff;color:var(--g);border:1.5px solid var(--g)}
+.btn.ac{background:var(--ac)}
+.btn.sm{padding:6px 12px;font-size:14px;border-radius:8px}
+.total{font-size:20px;font-weight:900;margin-left:auto}
+.diag{width:100%;height:auto;display:block;background:var(--gll);border-radius:10px}
+.log{font-size:12.5px;background:#1f2a24;color:#d7f0d9;border-radius:8px;padding:8px 10px;height:110px;overflow:auto;margin-top:8px}
+.log div{white-space:nowrap}.log .k{color:#ffc58f}
+.speed{font-size:13px;color:var(--mu);display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.receipt{background:#fff;border:1px solid var(--ln);box-shadow:0 2px 6px rgba(0,0,0,.08);padding:14px 18px;font-size:13px;max-width:320px;margin:0 auto}
+.receipt h3{text-align:center;margin:0 0 4px;font-size:16px}
+.receipt .c{text-align:center;color:var(--mu)}
+.receipt .ln{display:flex;justify-content:space-between}
+.receipt hr{border:0;border-top:1px dashed #aaa;margin:8px 0}
+.submit{border:2px solid var(--ac);background:var(--acl)}
+.submit textarea{width:100%;height:72px;border:1px solid #f0c3a2;border-radius:8px;padding:8px;font-size:13px;background:#fff;word-break:break-all}
+.cnt{font-size:28px;font-weight:900;color:var(--ac)}
+.note{font-size:13px;color:var(--mu)}
+.tblwrap{overflow:auto;border:1px solid var(--ln);border-radius:8px}
+table.db{border-collapse:collapse;font-size:13px;white-space:nowrap;width:100%}
+table.db th,table.db td{border-bottom:1px solid var(--ln);padding:5px 9px;text-align:left}
+table.db th{background:#eef2ee;font-weight:700;position:sticky;top:0;z-index:1}
+.reveal table.db th.hid{background:var(--ac);color:#fff}
+.reveal table.db td.hid{background:var(--acl);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media(max-width:800px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:#fff;border:1px solid var(--ln);border-radius:10px;padding:8px 12px}
+.kpi .l{font-size:12.5px;color:var(--mu)}
+.kpi .v{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+.tabs2{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs2 button{border:1.5px solid var(--ln);background:#fff;border-radius:99px;padding:7px 15px;font-weight:700;font-size:15px;color:var(--mu)}
+.tabs2 button.on{border-color:var(--g);background:var(--g);color:#fff}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;font-size:15px}
+.filters select{padding:5px 8px;border:1px solid var(--ln);border-radius:8px;background:#fff}
+table.heat{border-collapse:separate;border-spacing:2px;font-size:14px}
+table.heat th{font-weight:700;color:var(--mu);padding:2px 8px;text-align:center;white-space:nowrap}
+table.heat th.r{text-align:left;color:var(--ink)}
+table.heat td{text-align:center;border-radius:5px;padding:5px 4px;min-width:58px;font-variant-numeric:tabular-nums}
+.pairs .p{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--ln);font-size:16px}
+.pairs .p .n{margin-left:auto;font-weight:900;color:var(--g)}
+.idlist{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.idlist button{border:1.5px solid #bcd3ee;background:var(--bll);color:var(--bl);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700}
+.idlist button.on{background:var(--bl);color:#fff}
+.empty-big{text-align:center;padding:40px 10px;color:var(--mu)}
+.paste textarea{width:100%;height:110px;border:1.5px dashed var(--g2);border-radius:10px;padding:10px;font-size:13px}
+.msg{font-weight:700;color:var(--g)}
+.q{background:#fffbea;border:1.5px solid #f0d77a;border-radius:10px;padding:8px 14px;margin-top:12px;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>🏪 横浜・まちのコンビニPOSシミュレーター</h1>
+    <span class="roomtag" id="roomTag"></span>
+  </div>
+  <nav id="nav">
+    <button data-m="customer" class="on">🛒 お客さんになる</button>
+    <button data-m="honbu">🏢 本部になる（データを見る）</button>
+  </nav>
+</header>
+
+<main>
+<!-- ================= お客さん ================= -->
+<section class="mode on" id="m_customer">
+  <div class="lead">横浜市の<b>学校の近くの住宅地</b>にあるコンビニ「<b>じょうほうマート 横浜みどり坂店</b>」（架空のお店）で買い物をしよう。近くには高校・小中学校・住宅・駅へ向かう道があります。<b>毎回、客層・来店のきっかけ・学校の予定・天気などを変えて、いろいろなお客さんになりきって</b>何回も買ってOK。<br><span class="nolive">時間が来たら、右下の<b>「提出用コード」</b>をコピーして、先生の指示する場所に貼り付けて提出しよう。</span><span class="onlive">支払ったデータは<b>自動で本部に送られます</b>。</span></div>
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h2>どんなお客さん？ <button class="btn sec sm" id="btnRand">🎲 ランダムな人になる</button></h2>
+        <div class="settings">
+          <label>客層<select id="cAge"></select></label>
+          <label>性別<select id="cGen"></select></label>
+          <label>来店のきっかけ<select id="cPur"></select></label>
+          <label>曜日<select id="cDow"></select></label>
+          <label>時間帯<select id="cSlot"></select></label>
+          <label>学校の予定<select id="cSch"></select></label>
+          <label>天気<select id="cWx"></select></label>
+          <label>気温（℃）<input id="cTemp" type="number" min="-5" max="40" value="14"></label>
+        </div>
+      </div>
+      <div class="card">
+        <h2>商品棚 <span class="tag">タップでかごに入れる</span></h2>
+        <div class="shelf" id="shelf"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>🧺 かご</h2>
+        <div class="cart" id="cart"></div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px">支払い方法</div>
+        <div class="pay" id="pay"></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn" id="btnCheckout" disabled>レジで支払う</button><span class="sendst" id="sendSt"></span>
+          <span class="total" id="cartTotal">¥0</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>POSシステムの中で起きていること</h2>
+        <svg class="diag" id="diag" viewBox="0 0 580 330" aria-label="コンビニのPOSシステムの図"></svg>
+        <div class="speed">アニメーション：<label><input type="radio" name="spd" value="1"> ふつう</label><label><input type="radio" name="spd" value="0.45" checked> はやい</label><label><input type="radio" name="spd" value="0"> なし</label></div>
+        <div class="log mono" id="log"><div>（支払うと、ここに通信の記録が出ます）</div></div>
+      </div>
+      <div class="card" id="receiptCard" style="display:none">
+        <h2>🧾 レシート</h2>
+        <div class="receipt mono" id="receipt"></div>
+        <p class="note" style="text-align:center;margin:10px 0 0">レシートに書いてあること以外にも、記録されている情報があるかも…？</p>
+      </div>
+      <div class="card submit">
+        <h2>📮 提出用コード</h2>
+        <div>これまでの買い物：<span class="cnt" id="myCount">0</span> 回</div>
+        <textarea class="mono" id="myCode" readonly placeholder="買い物をすると、ここにコードが出ます"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+          <button class="btn ac sm" id="btnCopyCode">コードをコピー</button>
+          <span class="note" id="copyMsg">コードには、これまでの買い物がすべて入っています。最後に1回提出すればOK。</span>
+        </div>
+        <details style="margin-top:8px"><summary class="note" style="cursor:pointer">最初からやり直す</summary><button class="btn sec sm" id="btnClearMine" style="margin-top:6px">自分の買い物記録を消す</button></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 本部 ================= -->
+<section class="mode" id="m_honbu">
+  <div class="card onlive" id="liveCard" style="border:2px solid var(--bl)">
+    <h2>📡 自動共有モード <span class="tag" style="background:var(--bll);color:var(--bl)">クラス：<span id="liveRoom"></span></span></h2>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <label style="font-weight:700"><input type="checkbox" id="autoPoll" checked> 5秒ごとに自動で取り込む</label>
+      <button class="btn sm" id="btnPull">今すぐ取り込む</button>
+      <span class="msg" id="liveMsg"></span>
+      <span style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <input id="adminKey" type="password" placeholder="管理キー" style="padding:6px 8px;border:1px solid var(--ln);border-radius:8px;width:130px">
+        <button class="btn sec sm" id="btnClearServer">このクラスのデータを消す</button>
+      </span>
+    </div>
+    <p class="note" style="margin:6px 0 0">生徒が支払うたびに、スプレッドシートに自動で記録されます。生徒用のURL：<b class="mono" id="stuUrl"></b></p>
+  </div>
+  <details class="card paste" id="pasteCard">
+    <summary style="cursor:pointer;font-weight:700" class="onlive">提出用コードを貼り付けて取り込む（予備の方法）</summary>
+    <h2>📥 みんなの提出用コードを取り込む <span class="tag">先生の画面</span></h2>
+    <textarea id="pasteBox" class="mono" placeholder="Classroomの回答やGoogleフォームのスプレッドシートの列を、まとめてコピーしてここに貼り付けてください。余分な文字（名前・日時など）が混ざっていてもコードだけを読み取ります。"></textarea>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <button class="btn" id="btnImport">データベースに取り込む</button>
+      <span class="msg" id="importMsg"></span>
+      <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn sec sm" id="btnSample">練習用サンプルを入れる</button>
+        <button class="btn sec sm" id="btnClearDb">データを空にする</button>
+      </span>
+    </div>
+  </details>
+
+  <div id="hq"></div>
+</section>
+</main>
+
+<script>
+/* ===================== 設定 =====================
+ GAS_URL に Google Apps Script のウェブアプリURLを入れると、
+ 生徒の買い物が自動でスプレッドシートに送られ、本部画面に自動で集まります。
+ 空のままなら「提出用コード」を貼り付ける方式で動きます。
+*/
+const GAS_URL='';
+const ROOM=(new URLSearchParams(location.search).get('room')||'default').replace(/[^0-9A-Za-z_-]/g,'').slice(0,20)||'default';
+const LIVE=!!GAS_URL;
+/* ===================== 基本データ ===================== */
+// 横浜市の学校の近くの住宅地にある店（架空）の品ぞろえ
+const ITEMS=[
+ {n:'おにぎり（鮭）',p:150,e:'🍙'},{n:'おにぎり（ツナマヨ）',p:140,e:'🍙'},{n:'菓子パン',p:130,e:'🥐'},
+ {n:'シューマイ弁当',p:580,e:'🍱'},{n:'からあげ弁当',p:550,e:'🍱'},{n:'サラダ',p:350,e:'🥗'},
+ {n:'サンマーメン（カップ麺）',p:250,e:'🍜'},{n:'肉まん',p:160,e:'🥟'},{n:'からあげ棒',p:180,e:'🍗'},
+ {n:'アイス',p:180,e:'🍦'},{n:'お茶 500ml',p:140,e:'🍵'},{n:'スポーツドリンク',p:160,e:'🧃'},
+ {n:'炭酸飲料',p:180,e:'🥤'},{n:'ホットコーヒー',p:120,e:'☕'},{n:'牛乳 1L',p:230,e:'🥛'},
+ {n:'食パン',p:180,e:'🍞'},{n:'卵（6個）',p:260,e:'🥚'},{n:'ポテトチップス',p:170,e:'🥔'},
+ {n:'チョコレート',p:200,e:'🍫'},{n:'ノート',p:150,e:'📓'},{n:'シャーペンの芯',p:120,e:'✏️'},
+ {n:'栄養ドリンク',p:220,e:'⚡'},{n:'ビニール傘',p:700,e:'☂️'}
+];
+function checkDigit(s){let t=0;for(let i=0;i<12;i++)t+=(+s[i])*(i%2?3:1);return (10-t%10)%10}
+ITEMS.forEach((it,i)=>{const c='20'+String(4710+i*37).padStart(10,'0');it.code=c+checkDigit(c)});
+const NI=ITEMS.length;
+const AGES=['小中学生','高校生','大学生・20代','会社員','主婦・主夫','高齢者'],GEN=['男性','女性'];
+const PURS=['学校・部活の帰り','通勤・通学の途中','家の用事（買い足し）','散歩・近所'];
+const SCHS=['ふつうの日','テスト期間','部活の大会・試合','長期休み'];
+const SLOTS=['朝（6〜10時）','昼（10〜14時）','午後（14〜17時）','夕方（17〜20時）','夜（20〜24時）','深夜（0〜6時）'];
+const SL=['朝','昼','午後','夕方','夜','深夜'],SLH=[[6,4],[10,4],[14,3],[17,3],[20,4],[0,6]];
+const WX=['晴れ','くもり','雨'],WXE=['☀️','☁️','☔'];
+const DOWS=['月','火','水','木','金','土','日'];
+const PAYS=[{n:'現金'},{n:'交通系電子マネー',id:1},{n:'クレジットカード',id:1},{n:'ポイントカード＋現金',m:1},{n:'スマホアプリ（会員＋決済）',m:1}];
+const slotOf=h=>h<6?5:h<10?0:h<14?1:h<17?2:h<20?3:4;
+const tcName=t=>t<=12?'寒い（12℃以下）':t>=25?'暑い（25℃以上）':'ふつう（13〜24℃）';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const yen=n=>'¥'+Math.round(n).toLocaleString();
+// 保存名の頭を ypos_ にして、もとのコンビニPOS（pos2_）とデータが混ざらないようにする
+function store(k,v){try{if(v===undefined)return localStorage.getItem('ypos_'+k);if(v===null)localStorage.removeItem('ypos_'+k);else localStorage.setItem('ypos_'+k,v)}catch(e){return null}}
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+
+/* ===== コード形式 =====
+ YPOS-xxx:購入.購入...
+ 購入 = 客層(1)性別(1)曜日(1)時(2)分(2)天気(1)気温+10(2)支払(1)来店のきっかけ(1)学校の予定(1) - [商品(36進1桁)個数(1桁)]...
+*/
+function encodeP(p){return `${p.a}${p.g}${p.d}${String(p.hh).padStart(2,'0')}${String(p.mm).padStart(2,'0')}${p.w}${String(Math.max(0,Math.min(50,p.t+10))).padStart(2,'0')}${p.pay}${p.pu}${p.sc}-`+p.items.map(([i,q])=>i.toString(36)+q).join('')}
+function decodeOne(s){const x=/^([0-5])([01])([0-6])(\d\d)(\d\d)([0-2])(\d\d)([0-4])([0-3])([0-3])-((?:[0-9a-m][1-9])+)$/.exec(String(s).toLowerCase());if(!x)return null;
+ const items=[];for(let k=0;k<x[11].length;k+=2)items.push([parseInt(x[11][k],36),+x[11][k+1]]);
+ const hh=+x[4],mm=+x[5];if(hh>23||mm>59)return null;
+ return {a:+x[1],g:+x[2],d:+x[3],hh,mm,w:+x[6],t:+x[7]-10,pay:+x[8],pu:+x[9],sc:+x[10],items}}
+function decodeAll(text){
+ const out={};const re=/YPOS-([0-9a-z]{3}):([0-9a-z.\-]+)/gi;let m;
+ while((m=re.exec(text))){const sid=m[1].toLowerCase();const ps=[];
+  for(const s of m[2].toLowerCase().split('.')){const q=decodeOne(s);if(q)ps.push(q)}
+  if(ps.length&&(!out[sid]||out[sid].length<ps.length))out[sid]=ps;}
+ return out;
+}
+
+/* ===================== 画面切り替え・タイマー ===================== */
+function setMode(m){if(m==='honbu'&&LIVE)setTimeout(pull,0);$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));$$('section.mode').forEach(s=>s.classList.toggle('on',s.id==='m_'+m));if(m==='honbu')renderHQ();try{history.replaceState(null,'',location.search+(m==='honbu'?'#honbu':'#customer'))}catch(e){}}
+$$('#nav button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+if(ROOM!=='default'||LIVE)$('#roomTag').textContent='クラス：'+ROOM+(LIVE?'　📡 自動共有':'');
+if(location.hash==='#honbu')setMode('honbu');
+if(LIVE)document.body.classList.add('live');else $('#pasteCard').open=true;
+
+/* ===================== お客さん ===================== */
+const fill=(id,arr,sel)=>{$(id).innerHTML=arr.map((v,i)=>`<option value="${i}" ${i===sel?'selected':''}>${v}</option>`).join('')};
+fill('#cAge',AGES,1);fill('#cGen',GEN,0);fill('#cPur',PURS,0);fill('#cDow',DOWS.map(d=>d+'曜日'),4);fill('#cSlot',SLOTS,3);fill('#cSch',SCHS,0);fill('#cWx',WX.map((w,i)=>WXE[i]+' '+w),1);
+$('#btnRand').onclick=()=>{const r=n=>Math.floor(Math.random()*n);$('#cAge').value=r(AGES.length);$('#cGen').value=r(2);$('#cPur').value=r(PURS.length);$('#cDow').value=r(7);$('#cSlot').value=r(6);$('#cSch').value=r(SCHS.length);$('#cWx').value=r(3);$('#cTemp').value=[2,5,8,11,14,17,20,23,26,29,32,35][r(12)];};
+const cart={};
+$('#shelf').innerHTML=ITEMS.map((it,i)=>`<button class="item" data-i="${i}"><span class="q"></span><div class="e">${it.e}</div><div class="nm">${it.n}</div><div class="pr">${yen(it.p)}</div></button>`).join('');
+$('#pay').innerHTML=PAYS.map((p,i)=>`<label><input type="radio" name="pay" value="${i}" ${i===0?'checked':''}>${p.n}</label>`).join('');
+$$('#shelf .item').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;cart[i]=Math.min(9,(cart[i]||0)+1);renderCart()});
+let busy=false;
+function renderCart(){
+ const ks=Object.keys(cart).filter(k=>cart[k]>0);
+ $('#cart').innerHTML=ks.length?ks.map(k=>`<div class="row"><span style="font-size:20px">${ITEMS[k].e}</span>${ITEMS[k].n} × ${cart[k]}<span style="color:var(--mu)">${yen(ITEMS[k].p*cart[k])}</span><span class="ctl"><button class="x" data-k="${k}" data-d="-1" aria-label="1つ減らす">－</button><button class="x" data-k="${k}" data-d="1" aria-label="1つ増やす">＋</button><button class="del" data-k="${k}">取り消し</button></span></div>`).join('')+'<button class="clr" id="btnClearCart">🗑 かごを空にする</button>':'<div class="empty">棚の商品をタップしてかごに入れよう。</div>';
+ $$('#cart .x').forEach(b=>b.onclick=()=>{if(busy)return;const k=b.dataset.k;cart[k]=Math.max(0,Math.min(9,(cart[k]||0)+(+b.dataset.d)));renderCart()});
+ $$('#cart .del').forEach(b=>b.onclick=()=>{if(busy)return;delete cart[b.dataset.k];renderCart()});
+ if($('#btnClearCart'))$('#btnClearCart').onclick=()=>{if(busy)return;Object.keys(cart).forEach(k=>delete cart[k]);renderCart()};
+ $$('#shelf .item').forEach(b=>{const q=cart[b.dataset.i]||0;b.classList.toggle('has',q>0);b.querySelector('.q').textContent=q});
+ $('#cartTotal').textContent=yen(ks.reduce((s,k)=>s+ITEMS[k].p*cart[k],0));
+ $('#btnCheckout').disabled=!ks.length||busy;
+}
+renderCart();
+let SID=store('sid');if(!SID){SID=Math.random().toString(36).slice(2,5).padEnd(3,'0');store('sid',SID)}
+let mine=[];try{mine=JSON.parse(store('mine')||'[]')}catch(e){mine=[]}
+function renderCode(){$('#myCount').textContent=mine.length;$('#myCode').value=mine.length?`YPOS-${SID}:`+mine.map(encodeP).join('.'):''}
+renderCode();
+$('#btnCopyCode').onclick=async()=>{if(!mine.length)return;try{await navigator.clipboard.writeText($('#myCode').value);$('#copyMsg').textContent='コピーしました！先生の指示する場所に貼り付けて提出しよう。'}catch(e){$('#myCode').select();$('#copyMsg').textContent='選択しました。Ctrl+C（⌘+C）でコピーしてください。'}};
+$('#myCode').onclick=e=>e.target.select();
+$('#btnClearMine').onclick=()=>{mine=[];store('mine','[]');renderCode();$('#receiptCard').style.display='none'};
+
+/* 図 */
+const N={pos:{x:95,y:92,r:36,t:['POS','レジ']},pc:{x:245,y:92,r:36,t:['ストア','PC']},hq:{x:420,y:92,r:40,t:['本部']},db:{x:525,y:58},cus:{x:95,y:268,r:32,t:['顧客']},dc:{x:280,y:268,r:40,t:['配送','センター']},mk:{x:470,y:268,r:36,t:['メーカー']}};
+const NM={pos:'POSレジ',pc:'ストアPC',hq:'本部',db:'データベース',cus:'顧客',dc:'配送センター',mk:'メーカー'};
+(function drawDiag(){
+ const n=k=>{const o=N[k];return `<circle cx="${o.x}" cy="${o.y}" r="${o.r}" fill="#9ccf8f" stroke="#fff" stroke-width="3"/>${o.t.map((t,i)=>`<text x="${o.x}" y="${o.y+(i-(o.t.length-1)/2)*18+6}" text-anchor="middle" font-weight="900" font-size="${o.t.length>1?15:17}" fill="#1d2a22">${t}</text>`).join('')}`};
+ const ar=(a,b,c,d)=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#bfe0b6" stroke-width="10" marker-end="url(#ah)"/>`;
+ $('#diag').innerHTML=`<defs><marker id="ah" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4z" fill="#bfe0b6"/></marker></defs>
+ <ellipse cx="170" cy="96" rx="150" ry="68" fill="#d6ecd0"/><text x="170" y="155" text-anchor="middle" font-weight="900" font-size="14" fill="#3a8f4b">店舗</text>
+ ${ar(135,80,200,80)}${ar(205,106,140,106)}${ar(290,92,370,92)}${ar(392,128,315,236)}${ar(420,136,420,200)}${ar(434,268,330,268)}${ar(255,228,215,150)}${ar(80,135,80,232)}${ar(110,232,110,135)}
+ <path d="M500,40 v34 a25,8 0 0 0 50,0 v-34" fill="#fff" stroke="#888"/><ellipse cx="525" cy="40" rx="25" ry="8" fill="#fff" stroke="#888"/><text x="525" y="66" text-anchor="middle" font-size="11" font-weight="700">データ</text><text x="525" y="80" text-anchor="middle" font-size="11" font-weight="700">ベース</text>
+ ${['pos','pc','hq','cus','dc','mk'].map(n).join('')}<g id="pk"></g>`;
+})();
+const spd=()=>+document.querySelector('input[name=spd]:checked').value;
+function logLine(h){const l=$('#log');const d=document.createElement('div');d.innerHTML=h;l.appendChild(d);l.scrollTop=l.scrollHeight}
+function send(a,b,label,color='#e2702a'){
+ logLine(`<span class="k">${NM[a]} → ${NM[b]}</span>：${label}`);
+ const s=spd();if(!s)return Promise.resolve();
+ const A=N[a],B=N[b],dur=900*s;
+ return new Promise(res=>{const g=$('#pk');g.innerHTML=`<rect rx="6" height="22" fill="${color}"/><circle r="7" fill="${color}" stroke="#fff" stroke-width="2"/><text font-size="12" font-weight="700" fill="#fff"></text>`;
+  const rect=g.querySelector('rect'),c=g.querySelector('circle'),tx=g.querySelector('text');const sh=label.length>16?label.slice(0,16)+'…':label;tx.textContent=sh;const w=sh.length*12+12;rect.setAttribute('width',w);
+  const t0=performance.now();(function f(t){let p=Math.min(1,(t-t0)/dur);p=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;const x=A.x+(B.x-A.x)*p,y=A.y+(B.y-A.y)*p;c.setAttribute('cx',x);c.setAttribute('cy',y);
+   const lx=Math.max(4,Math.min(576-w,x-w/2));rect.setAttribute('x',lx);rect.setAttribute('y',y-34);tx.setAttribute('x',lx+6);tx.setAttribute('y',y-18);
+   if(p<1)requestAnimationFrame(f);else setTimeout(()=>{g.innerHTML='';res()},100*s)})(t0)});
+}
+$('#btnCheckout').onclick=async()=>{
+ busy=true;renderCart();$('#log').innerHTML='';
+ const s=+$('#cSlot').value,[h0,hl]=SLH[s];
+ const p={a:+$('#cAge').value,g:+$('#cGen').value,d:+$('#cDow').value,hh:(h0+Math.floor(Math.random()*hl))%24,mm:Math.floor(Math.random()*60),w:+$('#cWx').value,t:Math.round(+$('#cTemp').value||0),pay:+document.querySelector('input[name=pay]:checked').value,pu:+$('#cPur').value,sc:+$('#cSch').value,
+  items:Object.keys(cart).filter(k=>cart[k]>0).map(k=>[+k,cart[k]])};
+ const P=PAYS[p.pay];
+ await send('cus','pos','商品をレジに出す','#2f6fb0');
+ for(const [i] of p.items){await send('pos','pc','商品コード '+ITEMS[i].code);await send('pc','pos',`${ITEMS[i].n} ${yen(ITEMS[i].p)}`,'#3a8f4b');}
+ if(P.m)await send('cus','pos','会員バーコード','#2f6fb0');else logLine('<span class="k">POSレジ</span>：店員が客層ボタンを押す');
+ await send('cus','pos','支払い：'+P.n,'#2f6fb0');
+ await send('pos','cus','商品・レシート','#3a8f4b');
+ await send('pos','pc','売上データ');await send('pc','hq','売上情報');await send('hq','db','データを保存','#7a5cc0');
+ await send('hq','mk','発注情報');await send('hq','dc','配送情報');await send('mk','dc','商品','#3a8f4b');await send('dc','pc','商品（店舗へ配送）','#3a8f4b');
+ logLine('<span class="k">完了</span>：買い物のデータが本部に送られました');
+ mine.push(p);store('mine',JSON.stringify(mine));renderCode();showReceipt(p);
+ if(LIVE){pending.push(encodeP(p));store('pending',JSON.stringify(pending));flush()}
+ Object.keys(cart).forEach(k=>delete cart[k]);busy=false;renderCart();
+};
+let pending=[];try{pending=JSON.parse(store('pending')||'[]')}catch(e){pending=[]}
+let flushing=false;
+async function flush(){
+ if(!LIVE||flushing||!pending.length)return;flushing=true;const st=$('#sendSt');st.style.color='var(--mu)';st.textContent='本部へ送信中…';
+ try{while(pending.length){const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({room:ROOM,sid:SID,p:pending[0]})});const j=await r.json();if(!j.ok)throw new Error(j.error||'ng');pending.shift();store('pending',JSON.stringify(pending))}
+  st.style.color='var(--g)';st.textContent='✓ 本部に届きました';}
+ catch(e){st.style.color='var(--rd)';st.textContent='送信できませんでした（次の支払い時に再送／提出用コードでも提出できます）'}
+ flushing=false;
+}
+if(LIVE)setTimeout(flush,500);
+function dateOf(d){return new Date(2026,10,16+d)}
+function fmtDate(d){const t=dateOf(d);return `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`}
+const hm=p=>String(p.hh).padStart(2,'0')+':'+String(p.mm).padStart(2,'0');
+function showReceipt(p){
+ const P=PAYS[p.pay],total=p.items.reduce((s,[i,q])=>s+ITEMS[i].p*q,0),n=p.items.reduce((s,[,q])=>s+q,0);
+ $('#receipt').innerHTML=`<h3>じょうほうマート</h3><div class="c">横浜みどり坂店（架空）　TEL 045-000-0000</div><div class="c">${fmtDate(p.d)}(${DOWS[p.d]}) ${hm(p)}　レジ2</div><hr>
+ ${p.items.map(([i,q])=>`<div class="ln"><span>${ITEMS[i].n}${q>1?' ×'+q:''}</span><span>${yen(ITEMS[i].p*q)}</span></div>`).join('')}<hr>
+ <div class="ln"><b>合計（${n}点）</b><b>${yen(total)}</b></div><div class="ln"><span>${P.n}</span><span>${yen(total)}</span></div>
+ ${P.m?`<hr><div class="ln"><span>今回ポイント</span><span>${Math.floor(total/200)}pt</span></div>`:''}<hr><div class="c">ありがとうございました</div>`;
+ $('#receiptCard').style.display='block';
+}
+
+/* ===================== 本部 ===================== */
+let DB={};try{DB=JSON.parse(store('db')||'{}')}catch(e){DB={}}
+function saveDB(){store('db',JSON.stringify(DB))}
+let SDB={};
+async function pull(){
+ try{const r=await fetch(GAS_URL+'?room='+encodeURIComponent(ROOM)+'&t='+Date.now());const j=await r.json();if(!j.ok)throw 0;
+  const n={};for(const [sid,code] of j.rows){const q=decodeOne(code);if(q&&/^[0-9a-z]{3}$/.test(sid))(n['@'+sid]=n['@'+sid]||[]).push(q)}
+  const changed=JSON.stringify(n)!==JSON.stringify(SDB);SDB=n;
+  const t=new Date();$('#liveMsg').style.color='var(--g)';$('#liveMsg').textContent=`${j.rows.length}件の買い物を取り込み済み（${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}）`;
+  if(changed&&$('#m_honbu').classList.contains('on'))renderHQ();}
+ catch(e){$('#liveMsg').style.color='var(--rd)';$('#liveMsg').textContent='取り込みに失敗しました。GAS_URLとデプロイ設定を確認してください。'}
+}
+if(LIVE){
+ $('#liveRoom').textContent=ROOM;
+ $('#stuUrl').textContent=location.origin+location.pathname+'?room='+ROOM;
+ $('#btnPull').onclick=pull;
+ setInterval(()=>{if($('#autoPoll').checked&&$('#m_honbu').classList.contains('on'))pull()},5000);
+ $('#btnClearServer').onclick=async()=>{const b=$('#btnClearServer');
+  if(!b.dataset.c){b.dataset.c=1;b.textContent='本当に消す？もう一度押す';setTimeout(()=>{delete b.dataset.c;b.textContent='このクラスのデータを消す'},3000);return}
+  delete b.dataset.c;b.textContent='このクラスのデータを消す';
+  try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'clear',room:ROOM,key:$('#adminKey').value})});const j=await r.json();
+   if(!j.ok){$('#liveMsg').style.color='var(--rd)';$('#liveMsg').textContent='消せませんでした（管理キーを確認）';return}
+   SDB={};renderHQ();pull();}catch(e){$('#liveMsg').style.color='var(--rd)';$('#liveMsg').textContent='消せませんでした'}};
+}
+function idOf(sid,p){if(p.pay>=3)return 'M-'+String(hash(sid+'m')%9000000+1000000);if(p.pay===1)return 'JE-'+String(hash(sid+'e')%9000+1000);if(p.pay===2)return 'CC-****-'+String(hash(sid+'c')%9000+1000);return ''}
+function allBaskets(){const bs=[];const M={...DB,...SDB};for(const sid in M)M[sid].forEach(p=>bs.push({sid,...p,id:idOf(sid,p),slot:slotOf(p.hh)}));bs.sort((a,b)=>a.d-b.d||(a.hh*60+a.mm)-(b.hh*60+b.mm));return bs}
+$('#btnImport').onclick=()=>{
+ const got=decodeAll($('#pasteBox').value);const ks=Object.keys(got);
+ if(!ks.length){$('#importMsg').textContent='コードが見つかりませんでした。「YPOS-」で始まる文字列を貼り付けてください。';$('#importMsg').style.color='var(--rd)';return}
+ let added=0,upd=0;for(const k of ks){if(!DB[k])added++;else if(DB[k].length!==got[k].length)upd++;if(!DB[k]||DB[k].length<got[k].length)DB[k]=got[k]}
+ saveDB();$('#importMsg').style.color='var(--g)';$('#importMsg').textContent=`${ks.length}人分を読み取りました（新規${added}人・更新${upd}人）`;$('#pasteBox').value='';renderHQ();
+};
+$('#btnClearDb').onclick=()=>{if($('#btnClearDb').dataset.c){DB={};saveDB();renderHQ();$('#btnClearDb').textContent='データを空にする';delete $('#btnClearDb').dataset.c;$('#importMsg').textContent='データを空にしました'}else{$('#btnClearDb').dataset.c=1;$('#btnClearDb').textContent='本当に消す？もう一度押す';setTimeout(()=>{delete $('#btnClearDb').dataset.c;$('#btnClearDb').textContent='データを空にする'},3000)}};
+$('#btnSample').onclick=()=>{
+ let codes='';for(let s=0;s<30;s++){const sid='s'+s.toString(36).padStart(2,'0');const ps=[];const n=3+Math.floor(Math.random()*4);
+  for(let k=0;k<n;k++){const a=pickW([1,4,1.5,2,2,1.5]),g=Math.random()<.5?0:1,w=Math.random()<.25?2:Math.random()<.4?1:0,t=[3,7,12,16,20,26,31][Math.floor(Math.random()*7)];
+   const sc=pickW([5,1.5,1,1.5]);const d=sc===2?(Math.random()<.7?5+Math.floor(Math.random()*2):Math.floor(Math.random()*5)):Math.floor(Math.random()*7);
+   // 客層ごとに、来やすい時間帯と来店のきっかけを変える（住宅地の店らしい傾向）
+   const sl=a<=1?(sc===3?pickW([.5,2,2,1.5,1,0]):pickW([1.5,.3,2,3,.6,0])):a===3?pickW([3,1,.3,2.5,1.5,.5]):a===4?pickW([1,3,2,1.5,.3,0]):a===5?pickW([3,2.5,1,.5,.2,0]):pickW([1,1.5,1,1.5,2,1.5]);
+   const pu=a<=1?(sl>=2&&sl<=3&&sc!==3?0:pickW([.5,1.5,.5,1])):a===3?pickW([0,3,1,.3]):a===4?pickW([0,.3,3,1]):a===5?pickW([0,0,1.5,2]):pickW([.5,1.5,1,1]);
+   const [h0,hl]=SLH[sl];const pool=sampleWeights(sl,w,t,a,g,pu,sc);const its=[];const m=1+Math.floor(Math.random()*3);
+   for(let j=0;j<m;j++){const i=pickW(pool);pool[i]=0;its.push([i,Math.random()<.85?1:2])}
+   const pay=a<=1?pickW([4,2,0,.5,1]):a===5?pickW([4,1,1,2,.3]):pickW([1.5,2,1.5,1,2]);
+   ps.push({a,g,d,hh:(h0+Math.floor(Math.random()*hl))%24,mm:Math.floor(Math.random()*60),w,t,pay,pu,sc,items:its})}
+  codes+=`YPOS-${sid}:`+ps.map(encodeP).join('.')+'\n'}
+ $('#pasteBox').value=codes;$('#importMsg').textContent='サンプル（架空の30人分）を貼り付けました。「取り込む」を押してください。';$('#importMsg').style.color='var(--g)';
+};
+function pickW(ws){let s=0;for(const w of ws)s+=w;let x=Math.random()*s;for(let i=0;i<ws.length;i++){x-=ws[i];if(x<0)return i}return ws.length-1}
+// 練習用サンプルの「売れやすさ」（客層 a・時間帯 sl・天気 w・気温 t・来店のきっかけ pu・学校の予定 sc で変える）
+function sampleWeights(sl,w,t,a,g,pu,sc){const cold=t<=12,hot=t>=25,stu=a<=1;return ITEMS.map((_,i)=>{let v=1;
+ if(i<=1)v*=sl===0?3:sl===1?2:1;                                   // おにぎり：朝・昼
+ if(i===2)v*=stu?2.5:sl===0?1.5:.8;                                // 菓子パン：学生
+ if(i===3||i===4)v*=(sl===1||sl===3)?3:.5;                         // 弁当：昼・夕方
+ if(i===3)v*=a>=3?1.6:.7;                                          // シューマイ弁当：大人
+ if(i===5)v*=g?2:.6;                                               // サラダ
+ if(i===6)v*=sl>=4?2.5:cold?1.5:1;                                 // カップ麺：夜・寒い日
+ if(i===7)v*=cold?4:hot?.1:1;                                      // 肉まん：寒い日
+ if(i===8)v*=stu&&pu===0?5:stu?2:.6;                               // からあげ棒：学校・部活の帰り
+ if(i===9)v*=hot?4:cold?.3:1;if(i===9&&stu)v*=1.8;                 // アイス：暑い日・学生
+ if(i===10)v*=a===5?2:1;                                           // お茶：高齢者
+ if(i===11)v*=(sc===2?5:1)*(hot?2.5:1);                            // スポーツドリンク：大会・暑い日
+ if(i===12)v*=stu||a===2?2.5:.5;                                   // 炭酸飲料：若い人
+ if(i===13)v*=(a===3?3:1)*(sl===0?2.5:1)*(hot?.4:1);               // ホットコーヒー：会社員の朝
+ if(i>=14&&i<=16)v*=pu===2?6:a===4||a===5?1.5:.15;                 // 牛乳・食パン・卵：家の用事
+ if(i===17)v*=stu?2.2:.7;                                          // ポテトチップス
+ if(i===18)v*=(sc===1?3:1)*(g?1.5:1);                              // チョコレート：テスト期間
+ if(i===19||i===20)v*=sc===1?6:stu?1:.05;                          // ノート・シャーペンの芯：テスト期間
+ if(i===21)v*=(sc===1&&stu?4:a===3?1.5:.4)*(sl===5?2:1);           // 栄養ドリンク：テスト期間・会社員
+ if(i===22)v*=w===2?8:.03;                                         // ビニール傘：雨
+ return v})}
+
+const DIMS=[
+ {k:'slot',n:'時間帯',labels:SL,f:b=>b.slot},
+ {k:'d',n:'曜日',labels:DOWS,f:b=>b.d},
+ {k:'w',n:'天気',labels:WX.map((w,i)=>WXE[i]+w),f:b=>b.w},
+ {k:'t',n:'気温',labels:['寒い','ふつう','暑い'],f:b=>b.t<=12?0:b.t>=25?2:1},
+ {k:'a',n:'客層',labels:AGES,f:b=>b.a},
+ {k:'sc',n:'学校の予定',labels:SCHS,f:b=>b.sc},
+ {k:'pu',n:'来店のきっかけ',labels:PURS,f:b=>b.pu},
+ {k:'g',n:'性別',labels:GEN,f:b=>b.g},
+ {k:'pay',n:'支払方法',labels:['現金','電子マネー','クレカ','ポイント','アプリ'],f:b=>b.pay}
+];
+let hqView='table',dimK='slot',reveal=false,selId='';
+const QS={table:'このデータベースには、お客さんのどんな情報が記録されている？',cross:'学校の予定・来店のきっかけ・時間帯・天気などで、売れる商品はどう違う？　学校の近くのこのお店は、それをどう生かせる？',pair:'一緒に買われやすい組み合わせがわかると、何ができる？',id:'同じ会員ID・電子マネーIDの買い物をつなげると、何がわかる？　何ができる？'};
+function renderHQ(){
+ const bs=allBaskets(),el=$('#hq');
+ if(!bs.length){el.innerHTML=`<div class="card empty-big"><div style="font-size:44px">🗄️</div><div style="font-size:18px;font-weight:700">データベースはまだ空です</div><div>${LIVE?'生徒が支払うと、ここに自動でデータが集まります。':'みんなの提出用コードを上の欄に貼り付けて取り込もう。'}</div></div>`;return}
+ const lines=bs.flatMap(b=>b.items.map(([i,q])=>({b,i,q})));
+ const sales=lines.reduce((s,l)=>s+ITEMS[l.i].p*l.q,0);
+ const ic=new Array(NI).fill(0);lines.forEach(l=>ic[l.i]+=l.q);
+ const top=ic.map((c,i)=>({c,i})).sort((a,b)=>b.c-a.c)[0];
+ el.innerHTML=`<div class="kpis"><div class="kpi"><div class="l">参加した人数</div><div class="v">${new Set(bs.map(b=>b.sid)).size}人</div></div>
+ <div class="kpi"><div class="l">買い物の回数（レシート）</div><div class="v">${bs.length}回</div></div>
+ <div class="kpi"><div class="l">売上データの件数</div><div class="v">${lines.length}件</div></div>
+ <div class="kpi"><div class="l">売上合計</div><div class="v">${yen(sales)}</div></div>
+ <div class="kpi"><div class="l">いちばん売れた商品</div><div class="v" style="font-size:18px">${ITEMS[top.i].e} ${ITEMS[top.i].n}</div></div></div>
+ <div class="tabs2" id="hqTabs">
+  <button data-v="table">🗄️ データベースの中身</button><button data-v="cross">📊 何が・いつ・だれに売れた？</button><button data-v="pair">🔗 一緒に買われた組み合わせ</button><button data-v="id">🙋 ID別の買い物の記録</button>
+ </div><div class="card" id="hqBody"></div>`;
+ $$('#hqTabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===hqView);b.onclick=()=>{hqView=b.dataset.v;renderHQ()}});
+ const body=$('#hqBody');
+ if(hqView==='table'){
+  const cols=[['No'],['店舗コード'],['売上日'],['曜日'],['時刻'],['時間帯',1],['天気',1],['気温',1],['性別',1],['客層',1],['来店のきっかけ',1],['学校の予定',1],['商品コード'],['商品名'],['個数'],['金額'],['支払方法'],['会員ID・決済ID',1]];
+  let no=100000;
+  const rows=lines.map(({b,i,q})=>[++no,'Y1408',fmtDate(b.d),DOWS[b.d],hm(b),SL[b.slot],WX[b.w],b.t+'℃',GEN[b.g],AGES[b.a],PURS[b.pu],SCHS[b.sc],ITEMS[i].code,ITEMS[i].n,q,ITEMS[i].p*q,PAYS[b.pay].n,b.id||'―']).reverse();
+  body.innerHTML=`<h2>🗄️ 本部のデータベース：売上データ（${lines.length}件）<button class="btn ${reveal?'ac':'sec'} sm" id="btnReveal" style="margin-left:auto">${reveal?'色を消す':'レシートに書かれていない列に色をつける'}</button></h2>
+  <div class="tblwrap ${reveal?'reveal':''}" style="max-height:520px"><table class="db mono"><tr>${cols.map(c=>`<th class="${c[1]?'hid':''}">${c[0]}</th>`).join('')}</tr>
+  ${rows.map(r=>`<tr>${r.map((x,j)=>`<td class="${cols[j][1]?'hid':''}">${x}</td>`).join('')}</tr>`).join('')}</table></div>
+  <p class="note">1回の買い物（レシート1枚）で、買った商品の数だけ行が増えます。</p>`;
+  $('#btnReveal').onclick=()=>{reveal=!reveal;renderHQ()};
+ }
+ else if(hqView==='cross'){
+  const D=DIMS.find(x=>x.k===dimK);const L=D.labels.length;
+  const m=ITEMS.map(()=>new Array(L).fill(0));const colT=new Array(L).fill(0);
+  lines.forEach(l=>{const c=D.f(l.b);m[l.i][c]+=l.q;colT[c]+=l.q});
+  const visits=new Array(L).fill(0);bs.forEach(b=>visits[D.f(b)]++);
+  const order=ITEMS.map((_,i)=>i).filter(i=>ic[i]>0).sort((a,b)=>ic[b]-ic[a]);
+  body.innerHTML=`<h2>📊 商品 × <select id="dimSel" style="font-size:16px;font-weight:700;padding:4px 8px;border-radius:8px;border:1.5px solid var(--g)">${DIMS.map(x=>`<option value="${x.k}" ${x.k===dimK?'selected':''}>${x.n}</option>`).join('')}</select> で集計（売れた個数）</h2>
+  <div class="tblwrap" style="border:0"><table class="heat"><tr><th></th>${D.labels.map(l=>`<th>${l}</th>`).join('')}<th>合計</th></tr>
+  <tr><th class="r note">来店（レシート）数</th>${visits.map(v=>`<th>${v}</th>`).join('')}<th>${bs.length}</th></tr>
+  ${order.map(i=>{const row=m[i],mx=Math.max(...row,1);return `<tr><th class="r">${ITEMS[i].e} ${ITEMS[i].n}</th>${row.map(x=>{const a=x/mx;return `<td style="background:${x?`rgba(58,143,75,${(0.12+a*.8).toFixed(2)})`:'#f4f6f3'};color:${a>.55?'#fff':'#1d2a22'}">${x||''}</td>`}).join('')}<td><b>${ic[i]}</b></td></tr>`}).join('')}
+  </table></div><p class="note">色の濃さ：その商品がいちばん多く売れた列ほど濃い（行ごと）。上の「商品 × ○○」を切り替えてみよう。</p>`;
+  $('#dimSel').onchange=e=>{dimK=e.target.value;renderHQ()};
+ }
+ else if(hqView==='pair'){
+  const pc={},bc=new Array(NI).fill(0);
+  bs.forEach(b=>{const u=[...new Set(b.items.map(x=>x[0]))];u.forEach(i=>bc[i]++);for(let x=0;x<u.length;x++)for(let y=x+1;y<u.length;y++){const k=Math.min(u[x],u[y])+'-'+Math.max(u[x],u[y]);pc[k]=(pc[k]||0)+1}});
+  const ps=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  body.innerHTML=`<h2>🔗 同じレシートで一緒に買われた組み合わせ</h2>
+  ${ps.length?`<div class="pairs">${ps.map(([k,c])=>{const [a,b]=k.split('-').map(Number);const conf=Math.round(c/bc[a]*100);return `<div class="p"><span style="font-size:24px">${ITEMS[a].e}</span><b>${ITEMS[a].n}</b> と <span style="font-size:24px">${ITEMS[b].e}</span><b>${ITEMS[b].n}</b><span class="note">（${ITEMS[a].n}を買った人の${conf}%）</span><span class="n">${c}回</span></div>`}).join('')}</div>`:'<p>まだ2つ以上の商品を一緒に買ったデータがありません。</p>'}`;
+ }
+ else if(hqView==='id'){
+  const g={};bs.forEach(b=>{if(b.id)(g[b.id]=g[b.id]||[]).push(b)});
+  const all=Object.keys(g).sort((a,b)=>g[b].length-g[a].length);let ids=all.filter(id=>g[id].length>=2);const single=all.length-ids.length;if(!ids.length)ids=all.slice(0,20);
+  if(!selId||!g[selId])selId=ids[0]||'';
+  const cashN=bs.filter(b=>!b.id).length;
+  body.innerHTML=`<h2>🙋 会員ID・電子マネーIDごとの買い物の記録</h2>
+  <p class="note" style="margin-top:0">同じ会員ID（ポイントカード・アプリ）や、同じ電子マネー・クレジットカードで支払った買い物は、同じIDどうしをつなげられます（現金の買い物 ${cashN}回 はつなげられません）。</p>
+  ${ids.length?`<div class="idlist">${ids.map(id=>`<button data-id="${id}" class="${id===selId?'on':''}">${id}（${g[id].length}回）</button>`).join('')}${single&&ids.length<all.length?`<span class="note" style="align-self:center">ほか1回だけのID ${single}件</span>`:''}</div>
+  <div class="tblwrap"><table class="db mono"><tr><th>売上日</th><th>曜日</th><th>時刻</th><th>天気</th><th>気温</th><th>客層・性別</th><th>学校の予定</th><th>買った商品</th><th>金額</th><th>支払方法</th></tr>
+  ${g[selId].map(b=>`<tr><td>${fmtDate(b.d)}</td><td>${DOWS[b.d]}</td><td>${hm(b)}</td><td>${WXE[b.w]}${WX[b.w]}</td><td>${b.t}℃</td><td>${AGES[b.a]}・${GEN[b.g]}</td><td>${SCHS[b.sc]}</td><td>${b.items.map(([i,q])=>ITEMS[i].e+ITEMS[i].n+(q>1?'×'+q:'')).join('、')}</td><td>${yen(b.items.reduce((s,[i,q])=>s+ITEMS[i].p*q,0))}</td><td>${PAYS[b.pay].n}</td></tr>`).join('')}</table></div>
+  ${selId.startsWith('M-')?`<div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--bll);border:1.5px solid #bcd3ee;font-size:14.5px">会員IDは、登録した<b>生年月日・性別・住所</b>などの会員情報とも結びついています。</div>`:''}`
+  :'<p>まだ会員IDや電子マネーで支払った買い物がありません。</p>'}`;
+  $$('.idlist button').forEach(b=>b.onclick=()=>{selId=b.dataset.id;renderHQ()});
+ }
+ body.insertAdjacentHTML('beforeend',`<div class="q">✏️ ${QS[hqView]}</div>`);
+}
+</script>
+</body>
+</html>
